@@ -12,7 +12,7 @@ type Config struct {
 }
 
 const (
-	Version = "0.0.1"
+	Version = "0.0.2"
 	Granularity = 30 * time.Minute
 )
 
