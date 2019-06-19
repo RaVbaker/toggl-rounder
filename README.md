@@ -1,5 +1,5 @@
 # toggl-rounder
-Small script in Go to round [Toggl](https://www.toggl.com/app/timer) entries up to full half hours and which starts always at full hour.
+Small script in Go to round [Toggl](https://www.toggl.com/app/timer) entries up to full half hours and that starts always at full hour.
 
 
 ## How to build?
@@ -17,11 +17,11 @@ Usage of ./toggl-rounder:
 
 ```
 
-Plus please ensure you've setup `API_KEY` environment variable so it would know how to connect to the [Toggl API](https://github.com/toggl/toggl_api_docs).
+Plus please ensure you've setup `TOGGL_API_KEY` environment variable so it would know how to connect to the [Toggl API](https://github.com/toggl/toggl_api_docs).
 
 Full command to run update:
 
-```API_KEY=toggl-s3cret ./toggl-rounder -dry=false -rounding=true```
+```TOGGL_API_KEY=toggl-s3cret ./toggl-rounder -dry=false -rounding=true```
 
 --- 
 Enjoy!

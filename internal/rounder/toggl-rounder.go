@@ -2,10 +2,10 @@ package rounder
 
 import (
 	"fmt"
-	"github.com/jason0x43/go-toggl"
 	"time"
-)
 
+	"github.com/jason0x43/go-toggl"
+)
 
 type Config struct {
 	Rounding, DryRun bool
@@ -15,7 +15,7 @@ const Granularity = 30 * time.Minute
 
 var (
 	remainingSum time.Duration = 0
-	appConfig Config
+	appConfig    Config
 )
 
 func RoundThisMonth(apiKey string, config *Config) {
@@ -43,13 +43,13 @@ func fetchAccountEntries(session toggl.Session, since, until string) ([]toggl.Ti
 
 	currentPage := 1
 	for {
-		report, err := session.GetDetailedReport(workspaceId, since, until, currentPage);
+		report, err := session.GetDetailedReport(workspaceId, since, until, currentPage)
 		if err != nil {
 			return nil, err
 		}
 		entriesCount := len(report.Data)
 
-		for i:= 0; i < entriesCount; i++ {
+		for i := 0; i < entriesCount; i++ {
 			detailedTimeEntry := report.Data[i]
 			if detailedTimeEntry.Uid == account.Data.ID {
 				entry := buildTimeEntryFromDetails(workspaceId, detailedTimeEntry)
@@ -85,7 +85,7 @@ func updateEntries(entries []toggl.TimeEntry, session toggl.Session) {
 	for i := len(entries) - 1; i >= 0; i-- { // iterate from oldest to latest
 		entry = entries[i]
 		roundedTime := distributeRemaining(entry)
-		displayEntry(entry, roundedTime, remainingSum);
+		displayEntry(entry, roundedTime, remainingSum)
 		updateEntry(session, &entry, seconds(roundedTime))
 	}
 	if remainingSum > (Granularity/2) || (remainingSum > 0 && appConfig.Rounding) {
@@ -94,7 +94,7 @@ func updateEntries(entries []toggl.TimeEntry, session toggl.Session) {
 	println(fmt.Sprintf("%.2f", remainingSum.Minutes()))
 }
 
-func distributeRemaining(entry toggl.TimeEntry)  time.Duration {
+func distributeRemaining(entry toggl.TimeEntry) time.Duration {
 	roundedTime, remaining := missingTime(entry)
 
 	remainingSum += remaining
@@ -108,7 +108,7 @@ func distributeRemaining(entry toggl.TimeEntry)  time.Duration {
 func missingTime(entry toggl.TimeEntry) (time.Duration, time.Duration) {
 	exactDuration := entry.Stop.Unix() - entry.Start.Unix()
 	remaining := exactDuration % seconds(Granularity)
-	return time.Duration(exactDuration - remaining) * time.Second, time.Duration(remaining) * time.Second
+	return time.Duration(exactDuration-remaining) * time.Second, time.Duration(remaining) * time.Second
 }
 
 func displayEntry(entry toggl.TimeEntry, roundedTime time.Duration, remaining time.Duration) {
@@ -121,7 +121,7 @@ func seconds(duration time.Duration) int64 {
 
 func updateEntry(session toggl.Session, entry *toggl.TimeEntry, newDuration int64) {
 	entry.SetStartTime(entry.Start.Truncate(time.Hour), true)
-	entry.SetDuration(newDuration)
+	_ = entry.SetDuration(newDuration)
 	println("UPDATING:", entry.Duration, entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
 	if !appConfig.DryRun {
 		_, err := session.UpdateTimeEntry(*entry)

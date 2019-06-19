@@ -2,21 +2,22 @@ package main
 
 import (
 	"flag"
-	"github.com/ravbaker/toggl-rounder/internal/rounder"
 	"os"
+
+	"github.com/ravbaker/toggl-rounder/internal/rounder"
 )
 
 func main() {
 	config := rounder.Config{
 		Rounding: *flag.Bool("rounding", false, "Should it round last entry?"),
-		DryRun:  *flag.Bool("dry", true, "Should it update toggl?"),
+		DryRun:   *flag.Bool("dry", true, "Should it update toggl?"),
 	}
 	flag.Parse()
 
-	apiKey := os.Getenv("API_KEY")
+	apiKey := os.Getenv("TOGGL_API_KEY")
 	if apiKey == "" {
-		println("Missing $API_KEY for Toggl!")
+		println("Missing $TOGGL_API_KEY environment variable!")
 		os.Exit(-1)
 	}
-	rounder.RoundThisMonth(apiKey, &config);
+	rounder.RoundThisMonth(apiKey, &config)
 }
