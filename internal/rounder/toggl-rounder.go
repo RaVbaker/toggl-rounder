@@ -11,12 +11,19 @@ type Config struct {
 	Rounding, DryRun bool
 }
 
-const Granularity = 30 * time.Minute
+const (
+	Version = "0.0.1"
+	Granularity = 30 * time.Minute
+)
 
 var (
 	remainingSum time.Duration = 0
 	appConfig    Config
 )
+
+func PrintVersion() {
+	fmt.Println(Version)
+}
 
 func RoundThisMonth(apiKey string, config *Config) {
 	appConfig = *config
