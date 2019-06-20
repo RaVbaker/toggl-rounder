@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	Rounding, DryRun bool
+	Rounding, DryRun, Debug bool
 }
 
 const (
-	Version = "0.0.2"
+	Version = "0.0.3"
 	Granularity = 30 * time.Minute
 )
 
@@ -27,6 +27,9 @@ func PrintVersion() {
 
 func RoundThisMonth(apiKey string, config *Config) {
 	appConfig = *config
+	if !appConfig.Debug {
+		toggl.DisableLog()
+	}
 	session := toggl.OpenSession(apiKey)
 
 	now := time.Now()
@@ -81,7 +84,7 @@ func buildTimeEntryFromDetails(workspaceId int, entry toggl.DetailedTimeEntry) t
 		Tags:        entry.Tags,
 		Start:       entry.Start,
 		Stop:        entry.End,
-		Duration:    entry.End.Unix() - entry.Start.Unix(),
+		Duration:    entry.Duration/1000, // this is rounded duration since go-toggl fetches only such
 		DurOnly:     false,
 		Billable:    entry.Billable,
 	}
@@ -98,7 +101,7 @@ func updateEntries(entries []toggl.TimeEntry, session toggl.Session) {
 	if remainingSum > (Granularity/2) || (remainingSum > 0 && appConfig.Rounding) {
 		updateEntry(session, &entry, entry.Duration+seconds(Granularity))
 	}
-	println(fmt.Sprintf("%.2f", remainingSum.Minutes()))
+	println(fmt.Sprintf("remaining time: %.2dm%.2ds", int64(remainingSum.Minutes()), int64(remainingSum.Seconds()) % 60))
 }
 
 func distributeRemaining(entry toggl.TimeEntry) time.Duration {

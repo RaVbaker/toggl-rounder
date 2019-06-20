@@ -10,14 +10,20 @@ Run standard `go build` command.
 
 ```
 Usage of ./toggl-rounder:
+  -api-key secret-key
+    	Toggl API KEY secret-key, can also be provided via $TOGGL_API_KEY environment variable (default "cc62d1010f2ef0c84137a7de026b6089")
+  -debug
+    	Print debugging output of API calls
   -dry
-    	Should it update toggl? (default true)
+    	Unless set to false it doesn't update records in Toggl (default true)
   -rounding
-    	Should it round last entry?
-
+    	Enables rounding last entry up to full unit
+  -version
+    	Print the version
+    	
 ```
 
-Plus please ensure you've setup `TOGGL_API_KEY` environment variable so it would know how to connect to the [Toggl API](https://github.com/toggl/toggl_api_docs).
+Plus please ensure you've setup `TOGGL_API_KEY` environment variable or provided the `-api-key` parameter so it would know how to connect to the [Toggl API](https://github.com/toggl/toggl_api_docs).
 
 Full command to run update:
 
