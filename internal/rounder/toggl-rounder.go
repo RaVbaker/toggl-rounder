@@ -11,6 +11,10 @@ type Config struct {
 	Rounding, DryRun, Debug bool
 }
 
+type togglUpdater interface {
+	UpdateTimeEntry(timer toggl.TimeEntry) (toggl.TimeEntry, error)
+}
+
 const (
 	Version = "0.0.3"
 	Granularity = 30 * time.Minute
@@ -43,7 +47,7 @@ func RoundThisMonth(apiKey string, config *Config) {
 		return
 	}
 
-	updateEntries(entries, session)
+	updateEntries(entries, &session)
 }
 
 func fetchAccountEntries(session toggl.Session, since, until string) ([]toggl.TimeEntry, error) {
@@ -90,7 +94,7 @@ func buildTimeEntryFromDetails(workspaceId int, entry toggl.DetailedTimeEntry) t
 	}
 }
 
-func updateEntries(entries []toggl.TimeEntry, session toggl.Session) {
+func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 	var entry toggl.TimeEntry
 	for i := len(entries) - 1; i >= 0; i-- { // iterate from oldest to latest
 		entry = entries[i]
@@ -129,7 +133,7 @@ func seconds(duration time.Duration) int64 {
 	return int64(duration.Seconds())
 }
 
-func updateEntry(session toggl.Session, entry *toggl.TimeEntry, newDuration int64) {
+func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64) {
 	entry.SetStartTime(entry.Start.Truncate(time.Hour), true)
 	_ = entry.SetDuration(newDuration)
 	println("UPDATING:", entry.Duration, entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
