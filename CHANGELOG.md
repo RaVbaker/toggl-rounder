@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 2019-06-20
+### Added
+- correct handling of overlapping entries
+- written tests for basic behavior 
+
 ## [0.0.3] - 2019-06-20
 ### Added
 - `-debug` to print out detailed logs of go-toggl requests. By default it's more silent.

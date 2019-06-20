@@ -13,7 +13,7 @@ func main() {
 	appConfig := rounder.Config{
 		Rounding: *flag.Bool("rounding", false, "Enables rounding last entry up to full unit"),
 		DryRun:   *flag.Bool("dry", true, "Unless set to false it doesn't update records in Toggl"),
-		Debug:   *flag.Bool("debug", false, "Print debugging output of API calls"),
+		Debug:    *flag.Bool("debug", false, "Print debugging output of API calls"),
 	}
 	flag.Parse()
 
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	if *apiKey == "" {
-		println("Missing value for -api-key","\t", flag.Lookup("api-key").Usage)
+		println("Missing value for -api-key", "\t", flag.Lookup("api-key").Usage)
 		os.Exit(-1)
 	}
 	rounder.RoundThisMonth(*apiKey, &appConfig)

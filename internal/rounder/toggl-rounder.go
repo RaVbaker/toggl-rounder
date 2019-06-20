@@ -16,12 +16,13 @@ type togglUpdater interface {
 }
 
 const (
-	Version = "0.0.3"
+	Version     = "0.0.4"
 	Granularity = 30 * time.Minute
 )
 
 var (
 	remainingSum time.Duration = 0
+	lastEntryEnd time.Time
 	appConfig    Config
 )
 
@@ -88,7 +89,7 @@ func buildTimeEntryFromDetails(workspaceId int, entry toggl.DetailedTimeEntry) t
 		Tags:        entry.Tags,
 		Start:       entry.Start,
 		Stop:        entry.End,
-		Duration:    entry.Duration/1000, // this is rounded duration since go-toggl fetches only such
+		Duration:    entry.Duration / 1000, // this is rounded duration since go-toggl fetches only such
 		DurOnly:     false,
 		Billable:    entry.Billable,
 	}
@@ -104,8 +105,9 @@ func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 	}
 	if remainingSum > (Granularity/2) || (remainingSum > 0 && appConfig.Rounding) {
 		updateEntry(session, &entry, entry.Duration+seconds(Granularity))
+	} else {
+		println(fmt.Sprintf("remaining time: %s", remainingSum))
 	}
-	println(fmt.Sprintf("remaining time: %.2dm%.2ds", int64(remainingSum.Minutes()), int64(remainingSum.Seconds()) % 60))
 }
 
 func distributeRemaining(entry toggl.TimeEntry) time.Duration {
@@ -134,11 +136,16 @@ func seconds(duration time.Duration) int64 {
 }
 
 func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64) {
-	entry.SetStartTime(entry.Start.Truncate(time.Hour), true)
+	newStartTime := entry.Start.Round(Granularity)
+	if newStartTime.Before(lastEntryEnd) && !entry.Stop.Equal(lastEntryEnd) {
+		newStartTime = lastEntryEnd
+	}
+	entry.SetStartTime(newStartTime, true)
 	_ = entry.SetDuration(newDuration)
 	println("UPDATING:", entry.Duration, entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
 	if !appConfig.DryRun {
-		_, err := session.UpdateTimeEntry(*entry)
+		updatedEntry, err := session.UpdateTimeEntry(*entry)
+		lastEntryEnd = *updatedEntry.Stop
 		if err != nil {
 			println("ERR:", entry.ID, err)
 		}
