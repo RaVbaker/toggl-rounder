@@ -11,13 +11,13 @@ Run standard `go build` command.
 ```
 Usage of ./toggl-rounder:
   -api-key secret-key
-    	Toggl API KEY secret-key, can also be provided via $TOGGL_API_KEY environment variable (default "cc62d1010f2ef0c84137a7de026b6089")
+    	Toggl API KEY secret-key, can also be provided via $TOGGL_API_KEY environment variable (default "")
   -debug
     	Print debugging output of API calls
   -dry
     	Unless set to false it doesn't update records in Toggl (default true)
-  -rounding
-    	Enables rounding last entry up to full unit
+  -remaining string
+    	Decides on what to do with remaining time. Possible options: ["keep" "round_half" "round_up"] (default "keep")
   -version
     	Print the version
     	

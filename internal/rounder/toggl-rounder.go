@@ -2,13 +2,21 @@ package rounder
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/jason0x43/go-toggl"
 )
 
 type Config struct {
-	Rounding, DryRun, Debug bool
+	DryRun, Debug     bool
+	RemainingStrategy string
+}
+
+func NewConfig(dryRun bool, debug bool, remainingStrategy string) *Config {
+	remainingSum = 0
+	lastEntryEnd = time.Time{}
+	return &Config{DryRun: dryRun, Debug: debug, RemainingStrategy: remainingStrategy}
 }
 
 type togglUpdater interface {
@@ -16,11 +24,13 @@ type togglUpdater interface {
 }
 
 const (
-	Version     = "0.0.4"
+	Version     = "0.1.0"
 	Granularity = 30 * time.Minute
 )
 
 var (
+	AllowedRemainingStrategies = [...]string{"keep", "round_half", "round_up"}
+
 	remainingSum time.Duration = 0
 	lastEntryEnd time.Time
 	appConfig    Config
@@ -28,6 +38,15 @@ var (
 
 func PrintVersion() {
 	fmt.Println(Version)
+}
+
+func IsAllowedRemainingStrategy(candidate string) bool {
+	for _, n := range AllowedRemainingStrategies {
+		if candidate == n {
+			return true
+		}
+	}
+	return false
 }
 
 func RoundThisMonth(apiKey string, config *Config) {
@@ -96,6 +115,7 @@ func buildTimeEntryFromDetails(workspaceId int, entry toggl.DetailedTimeEntry) t
 }
 
 func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
+	remainingSum = 0
 	var entry toggl.TimeEntry
 	for i := len(entries) - 1; i >= 0; i-- { // iterate from oldest to latest
 		entry = entries[i]
@@ -103,11 +123,9 @@ func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 		displayEntry(entry, roundedTime, remainingSum)
 		updateEntry(session, &entry, seconds(roundedTime))
 	}
-	if remainingSum > (Granularity/2) || (remainingSum > 0 && appConfig.Rounding) {
-		updateEntry(session, &entry, entry.Duration+seconds(Granularity))
-	} else {
-		println(fmt.Sprintf("remaining time: %s", remainingSum))
-	}
+	extraDuration := lastEntryRemainingDuration()
+	updateEntry(session, &entry, entry.Duration+seconds(extraDuration))
+	println(fmt.Sprintf("remaining time(strategy: %s): %s, recorded: %s", appConfig.RemainingStrategy, remainingSum, extraDuration))
 }
 
 func distributeRemaining(entry toggl.TimeEntry) time.Duration {
@@ -142,12 +160,32 @@ func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64
 	}
 	entry.SetStartTime(newStartTime, true)
 	_ = entry.SetDuration(newDuration)
+	lastEntryEnd = *entry.Stop
 	println("UPDATING:", entry.Duration, entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
 	if !appConfig.DryRun {
-		updatedEntry, err := session.UpdateTimeEntry(*entry)
-		lastEntryEnd = *updatedEntry.Stop
+		_, err := session.UpdateTimeEntry(*entry)
 		if err != nil {
 			println("ERR:", entry.ID, err)
 		}
 	}
+}
+
+func lastEntryRemainingDuration() time.Duration {
+	var extraDuration time.Duration
+	switch appConfig.RemainingStrategy {
+	case "round_half":
+		if remainingSum > (Granularity / 2) {
+			extraDuration = Granularity
+		}
+	case "round_up":
+		if remainingSum > 0 {
+			extraDuration = Granularity
+		}
+	case "keep":
+		extraDuration = remainingSum
+	default:
+		println("Unknown remaining strategy: '", appConfig.RemainingStrategy, "'")
+		os.Exit(-2)
+	}
+	return extraDuration
 }
