@@ -29,7 +29,7 @@ Plus please ensure you've setup `TOGGL_API_KEY` environment variable or provided
 
 Full command to run update:
 
-```TOGGL_API_KEY=toggl-s3cret ./toggl-rounder -dry false -remaining round_up```
+```TOGGL_API_KEY=toggl-s3cret ./toggl-rounder -dry=false -remaining round_up```
 
 --- 
 Enjoy!
