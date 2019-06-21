@@ -24,7 +24,7 @@ type togglUpdater interface {
 }
 
 const (
-	Version     = "0.1.0"
+	Version     = "0.1.1"
 	Granularity = 30 * time.Minute
 )
 
@@ -120,7 +120,6 @@ func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 	for i := len(entries) - 1; i >= 0; i-- { // iterate from oldest to latest
 		entry = entries[i]
 		roundedTime := distributeRemaining(entry)
-		displayEntry(entry, roundedTime, remainingSum)
 		updateEntry(session, &entry, seconds(roundedTime))
 	}
 	extraDuration := lastEntryRemainingDuration()
@@ -140,13 +139,13 @@ func distributeRemaining(entry toggl.TimeEntry) time.Duration {
 }
 
 func missingTime(entry toggl.TimeEntry) (time.Duration, time.Duration) {
-	exactDuration := entry.Stop.Unix() - entry.Start.Unix()
+	exactDuration := actualDuration(&entry)
 	remaining := exactDuration % seconds(Granularity)
 	return time.Duration(exactDuration-remaining) * time.Second, time.Duration(remaining) * time.Second
 }
 
-func displayEntry(entry toggl.TimeEntry, roundedTime time.Duration, remaining time.Duration) {
-	println(entry.Start.Format("2006-01-02"), entry.Description, ":", entry.Duration, fmt.Sprintf("%.1f %.2f", roundedTime.Hours(), remaining.Minutes()), entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
+func displayEntry(entry toggl.TimeEntry, roundedTime time.Duration) {
+	println(entry.Start.Format("2006-01-02"), entry.Description, ":", entry.Duration, fmt.Sprintf("%.1f %.2f", roundedTime.Hours(), remainingSum.Minutes()), entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
 }
 
 func seconds(duration time.Duration) int64 {
@@ -155,9 +154,15 @@ func seconds(duration time.Duration) int64 {
 
 func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64) {
 	newStartTime := entry.Start.Round(Granularity)
+	// fix starting point to not overlap last entry
 	if newStartTime.Before(lastEntryEnd) && !entry.Stop.Equal(lastEntryEnd) {
 		newStartTime = lastEntryEnd
 	}
+	// nothing changed so let's skip update
+	if newStartTime.Equal(*entry.Start) && actualDuration(entry) == newDuration {
+		return
+	}
+	displayEntry(*entry, time.Duration(newDuration)*time.Second)
 	entry.SetStartTime(newStartTime, true)
 	_ = entry.SetDuration(newDuration)
 	lastEntryEnd = *entry.Stop
@@ -168,6 +173,10 @@ func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64
 			println("ERR:", entry.ID, err)
 		}
 	}
+}
+
+func actualDuration(entry *toggl.TimeEntry) int64 {
+	return entry.Stop.Unix() - entry.Start.Unix()
 }
 
 func lastEntryRemainingDuration() time.Duration {

@@ -99,14 +99,13 @@ func TestUpdateEntriesWithRoundHalfBelow(t *testing.T) {
 
 	updateEntries(list, fakeUpdater)
 
-	if len(fakeUpdater.entries) != 4 {
+	if len(fakeUpdater.entries) != 3 {
 		t.Errorf("Updates count mismatch. Expect 4, got: %d", len(fakeUpdater.entries))
 	}
 
 	entryFor19th := fakeUpdater.entries[0] // last from list
 	entryFor20th := fakeUpdater.entries[1]
 	entryFor21th := fakeUpdater.entries[2]
-	entryFor21thUpdated := fakeUpdater.entries[3]
 
 	if !matchTimeSpec(entryFor19th, makeTime(time.June, 19, 8, 0, 0), 5*time.Hour) {
 		t.Errorf("Wrong entryFor19th entry updated: expected 8:00->13:00 with 5h duration while got: %s->%s", entryFor19th.Start.String(), entryFor19th.Stop.String())
@@ -118,10 +117,7 @@ func TestUpdateEntriesWithRoundHalfBelow(t *testing.T) {
 	if !matchTimeSpec(entryFor21th, makeTime(time.June, 21, 9, 30, 0), 5*time.Hour) {
 		t.Errorf("Wrong entryFor21th update for 21th entry: expected 9:30->13:30 with 5h30 duration while got: %s->%s", entryFor21th.Start.String(), entryFor21th.Stop.String())
 	}
-
-	if !matchTimeSpec(entryFor21thUpdated, makeTime(time.June, 21, 9, 30, 0), 5*time.Hour) {
-		t.Errorf("Wrong second update for 21th entry: expected 9:30->14:00 with 5h00 duration while got: %s->%s", entryFor21thUpdated.Start.String(), entryFor21thUpdated.Stop.String())
-	}
+	// it didn't updated last entry since was below half of Granularity
 }
 
 func TestUpdateEntriesWithRoundHalfAbove(t *testing.T) {

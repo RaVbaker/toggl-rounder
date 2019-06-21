@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2019-06-21
+### Added 
+- Optimization: no more updates when nothing changes in the entry
+
 ## [0.1.0] - 2019-06-21
 ### Added 
 - different strategies for rounding last entry remaining time with new `-remainig` argument
