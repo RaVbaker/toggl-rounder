@@ -6,6 +6,8 @@ Small script in Go to round [Toggl](https://www.toggl.com/app/timer) entries up 
 
 Run standard `go build` command.
 
+To build all versions for release please run `./build.sh`.
+
 ## How to use it?
 
 ```
