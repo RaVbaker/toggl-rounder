@@ -63,7 +63,7 @@ func RoundThisMonth(apiKey string, config *Config) {
 	entries, err := fetchAccountEntries(session, monthBegin, today)
 
 	if err != nil {
-		println("ERR:", err)
+		fmt.Println("ERR:", err)
 		return
 	}
 
@@ -124,7 +124,7 @@ func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 	}
 	extraDuration := lastEntryRemainingDuration()
 	updateEntry(session, &entry, entry.Duration+seconds(extraDuration))
-	println(fmt.Sprintf("\033[1;33m=> Remaining time(strategy: %s): %s, recorded: %s\033[0m", appConfig.RemainingStrategy, remainingSum, extraDuration))
+	fmt.Printf("\033[1;33m=> Remaining time(strategy: %s): %s, recorded: %s\033[0m\n", appConfig.RemainingStrategy, remainingSum, extraDuration)
 }
 
 func distributeRemaining(entry toggl.TimeEntry) time.Duration {
@@ -141,11 +141,11 @@ func distributeRemaining(entry toggl.TimeEntry) time.Duration {
 func missingTime(entry toggl.TimeEntry) (time.Duration, time.Duration) {
 	exactDuration := actualDuration(&entry)
 	remaining := exactDuration % seconds(Granularity)
-	return secondsAsDuration(exactDuration-remaining), secondsAsDuration(remaining)
+	return secondsAsDuration(exactDuration - remaining), secondsAsDuration(remaining)
 }
 
 func displayEntry(entry toggl.TimeEntry, roundedTime time.Duration) {
-	println(
+	fmt.Println(
 		fmt.Sprintf("ENTRY<\033[1;31m%d\033[0m>", entry.ID),
 		fmt.Sprintf("\033[1;34m%s\033[0m", entry.Start.Format("2006-01-02")),
 		"existing(rounded):", secondsAsDuration(entry.Duration).String(),
@@ -180,11 +180,11 @@ func updateEntry(session togglUpdater, entry *toggl.TimeEntry, newDuration int64
 	entry.SetStartTime(newStartTime, true)
 	_ = entry.SetDuration(newDuration)
 	lastEntryEnd = *entry.Stop
-	println("UPDATING:", secondsAsDuration(entry.Duration).String(), entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
+	fmt.Println("UPDATING:", secondsAsDuration(entry.Duration).String(), entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"))
 	if !appConfig.DryRun {
 		_, err := session.UpdateTimeEntry(*entry)
 		if err != nil {
-			println("ERR:", entry.ID, err)
+			fmt.Println("ERR:", entry.ID, err)
 		}
 	}
 }
@@ -207,7 +207,7 @@ func lastEntryRemainingDuration() time.Duration {
 	case "keep":
 		extraDuration = remainingSum
 	default:
-		println("Unknown remaining strategy: '", appConfig.RemainingStrategy, "'")
+		fmt.Printf("Unknown remaining strategy: '%s'", appConfig.RemainingStrategy)
 		os.Exit(-2)
 	}
 	return extraDuration

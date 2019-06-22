@@ -32,11 +32,11 @@ func parseArgs() {
 	flag.Parse()
 
 	if !rounder.IsAllowedRemainingStrategy(*remainingStrategy) {
-		println(fmt.Sprintf("Not allowed -remaining value: '%s'. Allowed: %q", *remainingStrategy, rounder.AllowedRemainingStrategies))
+		fmt.Printf("Not allowed -remaining value: '%s'. Allowed: %q\n", *remainingStrategy, rounder.AllowedRemainingStrategies)
 		os.Exit(-1)
 	}
 	if *apiKey == "" {
-		println("Missing value for -api-key", "\t", flag.Lookup("api-key").Usage)
+		fmt.Println("Missing value for -api-key", "\t", flag.Lookup("api-key").Usage)
 		os.Exit(-1)
 	}
 }
