@@ -5,15 +5,21 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gookit/color"
+
 	"github.com/ravbaker/toggl-rounder/internal/rounder"
 )
 
-var version, dryRun, debugMode *bool
+var version, colors, dryRun, debugMode *bool
 var apiKey, remainingStrategy *string
 
 func main() {
 	parseArgs()
 	appConfig := rounder.NewConfig(*dryRun, *debugMode, *remainingStrategy)
+
+	if !*colors {
+		color.Disable()
+	}
 
 	if *version {
 		rounder.PrintVersion()
@@ -25,6 +31,7 @@ func main() {
 
 func parseArgs() {
 	version = flag.Bool("version", false, "Print the version")
+	colors = flag.Bool("colors", true, "Display colorful output in Terminal")
 	apiKey = flag.String("api-key", os.Getenv("TOGGL_API_KEY"), "Toggl API KEY `secret-key`, can also be provided via $TOGGL_API_KEY environment variable")
 	dryRun = flag.Bool("dry", true, "Unless set to false it doesn't update records in Toggl")
 	remainingStrategy = flag.String("remaining", "keep", fmt.Sprintf("Decides on what to do with remaining time. Possible options: %q", rounder.AllowedRemainingStrategies))

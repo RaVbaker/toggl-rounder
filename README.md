@@ -13,7 +13,9 @@ To build all versions for release please run `./build.sh`.
 ```
 Usage of ./toggl-rounder:
   -api-key secret-key
-    	Toggl API KEY secret-key, can also be provided via $TOGGL_API_KEY environment variable (default "")
+    	Toggl API KEY secret-key, can also be provided via $TOGGL_API_KEY environment variable
+  -colors
+    	Display colorful output in Terminal (default true)
   -debug
     	Print debugging output of API calls
   -dry

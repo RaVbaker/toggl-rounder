@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gookit/color"
 	"github.com/jason0x43/go-toggl"
 )
 
@@ -24,7 +25,7 @@ type togglUpdater interface {
 }
 
 const (
-	Version     = "0.1.1"
+	Version     = "0.1.2"
 	Granularity = 30 * time.Minute
 )
 
@@ -124,7 +125,7 @@ func updateEntries(entries []toggl.TimeEntry, session togglUpdater) {
 	}
 	extraDuration := lastEntryRemainingDuration()
 	updateEntry(session, &entry, entry.Duration+seconds(extraDuration))
-	fmt.Printf("\033[1;33m=> Remaining time(strategy: %s): %s, recorded: %s\033[0m\n", appConfig.RemainingStrategy, remainingSum, extraDuration)
+	color.Success.Printf("=> Remaining time(strategy: %s): %s, recorded: %s\n", appConfig.RemainingStrategy, remainingSum, extraDuration)
 }
 
 func distributeRemaining(entry toggl.TimeEntry) time.Duration {
@@ -146,15 +147,15 @@ func missingTime(entry toggl.TimeEntry) (time.Duration, time.Duration) {
 
 func displayEntry(entry toggl.TimeEntry, roundedTime time.Duration) {
 	fmt.Println(
-		fmt.Sprintf("ENTRY<\033[1;31m%d\033[0m>", entry.ID),
-		fmt.Sprintf("\033[1;34m%s\033[0m", entry.Start.Format("2006-01-02")),
+		fmt.Sprintf("ENTRY<%s>", color.Question.Render(entry.ID)),
+		color.Danger.Render(entry.Start.Format("2006-01-02")),
 		"existing(rounded):", secondsAsDuration(entry.Duration).String(),
 		"existing(actual):", secondsAsDuration(actualDuration(&entry)).String(),
 		"expected:", roundedTime.String(),
 		"remaining:", remainingSum.String(),
 		entry.Start.Format("15:04:05"), "->", entry.Stop.Format("15:04:05"),
 		"\n",
-		fmt.Sprintf("\033[1;36m%s\033[0m", entry.Description),
+		color.Comment.Render(entry.Description),
 	)
 }
 

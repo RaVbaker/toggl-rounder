@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2019-06-22
+### Added 
+- Option to not display colorful terminal output.
+- more readable details of what is happening
+
+
 ## [0.1.1] - 2019-06-21
 ### Added 
 - Optimization: no more updates when nothing changes in the entry
