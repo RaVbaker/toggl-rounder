@@ -37,6 +37,10 @@ func parseArgs() {
 	remainingStrategy = flag.String("remaining", "keep", fmt.Sprintf("Decides on what to do with remaining time. Possible options: %q", rounder.AllowedRemainingStrategies))
 	debugMode = flag.Bool("debug", false, "Print debugging output of API calls")
 	flag.Parse()
+	
+	if *version {
+		return
+	}
 
 	if !rounder.IsAllowedRemainingStrategy(*remainingStrategy) {
 		fmt.Printf("Not allowed -remaining value: '%s'. Allowed: %q\n", *remainingStrategy, rounder.AllowedRemainingStrategies)
