@@ -25,7 +25,7 @@ type togglUpdater interface {
 }
 
 const (
-	Version     = "0.1.2"
+	Version     = "0.1.3"
 	Granularity = 30 * time.Minute
 )
 
@@ -111,7 +111,7 @@ func buildTimeEntryFromDetails(workspaceId int, entry toggl.DetailedTimeEntry) t
 		Stop:        entry.End,
 		Duration:    entry.Duration / 1000, // this is rounded duration since go-toggl fetches only such
 		DurOnly:     false,
-		Billable:    entry.Billable,
+		Billable:    true, // not from entry.Billable because it's legacy value, the valid filed should be "is_billable"
 	}
 }
 
