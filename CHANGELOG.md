@@ -6,9 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.3] - 2019-06-22
+## [0.1.3] - 2019-06-28
+### Added
+- script release.sh to make automatic releases
 ### Changed 
 - All updated entries are saved as 'billable'
+- Allow to ask for `-version` of script without providing the `-api-key`
 
 ## [0.1.2] - 2019-06-22
 ### Added 
