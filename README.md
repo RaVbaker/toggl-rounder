@@ -1,7 +1,6 @@
 # toggl-rounder
 Small script in Go to round [Toggl](https://www.toggl.com/app/timer) entries up to full half hours and that starts always at full hour.
 
-
 ## How to build?
 
 Run standard `go build` command.
